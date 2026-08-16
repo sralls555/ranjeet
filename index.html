@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study Register</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   Study Register — one register, five dividers.
+   Palette: fountain-pen ink chrome, ruled-paper canvas,
+   subject accents lifted from gel pen inks.
+   ================================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --ink: #14183B;
+  --paper: #F6F7FB;
+  --card: #FFFFFF;
+  --rule: #DCE0EE;
+  --graphite: #262B45;
+  --muted: #6B7192;
+  --accent: #2F49D1;
+  --danger: #9B1C2E;
+}
+
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  color: var(--graphite);
+  background: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .disp {
+  font-family: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+input, textarea, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+.app { display: flex; min-height: 100vh; min-height: 100dvh; }
+
+/* ---------------- tab rail ---------------- */
+
+.rail {
+  width: 232px; flex: 0 0 232px; background: var(--ink);
+  padding: 22px 0 18px; display: flex; flex-direction: column; gap: 2px;
+}
+.brand { padding: 0 18px 20px; }
+.brand-mark {
+  font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700;
+  font-size: 19px; color: #fff; letter-spacing: -0.03em; line-height: 1.1;
+}
+.brand-sub { font-size: 11px; color: #8A90B8; margin-top: 5px; }
+
+.rail-label {
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #666DA0; padding: 0 18px 8px;
+}
+
+.tab {
+  position: relative; display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px 11px 18px; margin-left: 10px; width: calc(100% - 10px);
+  color: #B9BEDC; font-size: 14px; text-align: left;
+  border-radius: 6px 0 0 6px; transition: background .16s, color .16s;
+}
+.tab:hover { background: rgba(255,255,255,.06); color: #fff; }
+.tab .dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 7px; }
+.tab .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tab .ct { font-size: 11px; color: #7A80AE; }
+
+/* the signature: the active tab turns to paper and merges with the canvas */
+.tab.on {
+  background: var(--paper); color: var(--ink); font-weight: 600;
+  margin-right: -1px; box-shadow: 0 2px 14px rgba(0,0,0,.22);
+}
+.tab.on .ct { color: var(--muted); }
+.tab.on::before {
+  content: ''; position: absolute; left: 0; top: 8px; bottom: 8px;
+  width: 3px; background: var(--tabcolor); border-radius: 2px;
+}
+
+.rail-foot { margin-top: auto; padding: 14px 18px 0; }
+.rail-btn {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  color: #8A90B8; font-size: 13px; padding: 8px 0; transition: color .15s;
+}
+.rail-btn:hover, .rail-btn.on { color: #fff; }
+
+/* ---------------- canvas ---------------- */
+
+.canvas {
+  flex: 1; min-width: 0; background: var(--paper);
+  background-image: repeating-linear-gradient(to bottom, transparent 0 31px, var(--rule) 31px 32px);
+  background-position: 0 6px;
+}
+.canvas-in { max-width: 940px; padding: 34px 40px 90px; }
+
+.head { padding-bottom: 18px; margin-bottom: 26px; border-bottom: 2px solid var(--accent); }
+.head h1 { font-size: 34px; font-weight: 700; color: var(--ink); }
+.head-meta { display: flex; gap: 14px; align-items: center; margin-top: 7px; font-size: 12px; color: var(--muted); }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 11px;
+  background: var(--card); border: 1px solid var(--rule); padding: 3px 9px; border-radius: 20px;
+}
+
+/* ---------------- intake ---------------- */
+
+.intake { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 30px; }
+.intake-card {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 10px;
+  padding: 16px 15px; text-align: left;
+  transition: border-color .16s, transform .16s, box-shadow .16s;
+}
+.intake-card:hover {
+  border-color: var(--accent); transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(20,24,59,.09);
+}
+.intake-card.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.intake-card svg { width: 26px; height: 26px; color: var(--accent); margin-bottom: 10px; display: block; }
+.intake-card .t { font-weight: 600; font-size: 14px; color: var(--ink); }
+.intake-card .d { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+
+.panel {
+  background: var(--card); border: 1px solid var(--rule);
+  border-radius: 10px; padding: 20px; margin-bottom: 30px;
+}
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+
+.inp {
+  width: 100%; background: #FBFCFE; border: 1px solid var(--rule);
+  border-radius: 7px; padding: 10px 12px; font-size: 14px; transition: border-color .15s;
+}
+.inp:focus { border-color: var(--accent); outline: none; }
+textarea.inp { resize: vertical; min-height: 76px; line-height: 1.55; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font-size: 12px; padding: 6px 11px; border-radius: 20px;
+  border: 1px solid var(--rule); background: #FBFCFE; color: var(--muted); transition: all .14s;
+}
+.chip:hover { border-color: var(--accent); color: var(--ink); }
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
+
+.style-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.style-opt {
+  border: 1px solid var(--rule); background: #FBFCFE; border-radius: 8px;
+  padding: 10px 12px; text-align: left; transition: all .14s;
+}
+.style-opt:hover { border-color: var(--accent); }
+.style-opt.on { border-color: var(--accent); background: #fff; box-shadow: inset 0 0 0 1px var(--accent); }
+.style-opt .t { font-size: 13px; font-weight: 600; color: var(--ink); }
+.style-opt .h { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+
+.btn {
+  background: var(--accent); color: #fff; font-weight: 600; font-size: 14px;
+  padding: 11px 20px; border-radius: 7px; transition: filter .15s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn:hover:not(:disabled) { filter: brightness(1.1); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn-ink { background: var(--ink); }
+
+.btn-ghost {
+  border: 1px solid var(--rule); background: var(--card); color: var(--graphite);
+  font-size: 13px; padding: 8px 14px; border-radius: 7px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--ink); }
+.btn-ghost svg { width: 14px; height: 14px; display: block; }
+
+.drop {
+  border: 1.5px dashed var(--rule); border-radius: 9px; padding: 28px 20px;
+  text-align: center; background: #FBFCFE; transition: all .16s;
+}
+.drop.over { border-color: var(--accent); background: #fff; }
+.drop .big { font-size: 14px; font-weight: 600; color: var(--ink); }
+.drop .small { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.filelist { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.filerow {
+  display: flex; align-items: center; gap: 9px; font-size: 13px;
+  background: #FBFCFE; border: 1px solid var(--rule); border-radius: 7px; padding: 8px 11px;
+}
+.filerow svg { width: 15px; height: 15px; color: var(--accent); flex: 0 0 15px; }
+.filerow .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.filerow .sz { font-size: 11px; color: var(--muted); }
+
+/* ---------------- notes grid ---------------- */
+
+.sec-label {
+  font-size: 11px; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+}
+.sec-label::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 12px; }
+.note {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 9px;
+  padding: 15px; text-align: left; position: relative; overflow: hidden;
+  transition: transform .16s, box-shadow .16s, border-color .16s;
+}
+.note::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--nc); }
+.note:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(20,24,59,.1); border-color: #C7CDE4; }
+.note .t { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600; font-size: 15px; color: var(--ink); line-height: 1.3; }
+.note .s {
+  font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.note .f { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 10.5px; color: var(--muted); }
+.src { display: inline-flex; padding: 2px 7px; border-radius: 4px; background: var(--paper); }
+.stamp { margin-left: auto; }
+
+.empty { text-align: center; padding: 52px 20px; }
+.empty .t { font-family: 'Bricolage Grotesque', sans-serif; font-size: 17px; font-weight: 600; color: var(--ink); }
+.empty .d { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+.search-in {
+  width: 100%; background: var(--card); border: 1px solid var(--rule);
+  border-radius: 8px; padding: 10px 13px; font-size: 14px; margin-bottom: 22px;
+}
+.search-in:focus { border-color: var(--accent); outline: none; }
+
+/* ---------------- sheets ---------------- */
+
+.scrim {
+  position: fixed; inset: 0; background: rgba(20,24,59,.5);
+  backdrop-filter: blur(3px); display: flex; justify-content: flex-end;
+  z-index: 60; animation: fade .18s ease;
+}
+.sheet {
+  width: min(720px, 100%); background: var(--paper); height: 100%; overflow-y: auto;
+  animation: slide .24s cubic-bezier(.22,.8,.3,1); box-shadow: -16px 0 44px rgba(20,24,59,.24);
+}
+.sheet.narrow { width: min(520px, 100%); }
+@keyframes fade { from { opacity: 0 } }
+@keyframes slide { from { transform: translateX(26px); opacity: 0 } }
+
+.sheet-bar {
+  position: sticky; top: 0; background: var(--paper); border-bottom: 1px solid var(--rule);
+  padding: 14px 26px; display: flex; align-items: center; gap: 8px; z-index: 2;
+}
+.sheet-bar .spacer { margin-left: auto; }
+.sheet-body { padding: 24px 26px 60px; }
+.sheet-body h2 { font-size: 27px; font-weight: 700; color: var(--ink); line-height: 1.15; }
+
+.eyebrow {
+  font-size: 11px; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--accent); font-weight: 600; margin-bottom: 8px;
+}
+.sheet-sum {
+  font-size: 14.5px; color: var(--graphite); line-height: 1.65;
+  margin: 12px 0 22px; padding-left: 13px; border-left: 3px solid var(--accent);
+}
+.block { margin-bottom: 22px; }
+.block h3 { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 9px; }
+.block ul { margin: 0; padding-left: 17px; }
+.block li { font-size: 14px; line-height: 1.72; color: var(--graphite); margin-bottom: 5px; }
+
+.fmla {
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: var(--card);
+  border: 1px solid var(--rule); border-left: 3px solid var(--accent);
+  padding: 9px 12px; border-radius: 0 6px 6px 0; margin-bottom: 7px; overflow-x: auto;
+}
+
+.fc {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 8px;
+  padding: 14px; margin-bottom: 8px; text-align: left; width: 100%; transition: border-color .15s;
+}
+.fc:hover { border-color: var(--accent); }
+.fc .q { font-size: 13.5px; font-weight: 600; color: var(--ink); display: flex; gap: 9px; }
+.fc .q .n { color: var(--accent); font-family: 'IBM Plex Mono', monospace; }
+.fc .a { font-size: 13.5px; color: var(--graphite); line-height: 1.6; margin-top: 9px; padding-top: 9px; border-top: 1px dashed var(--rule); }
+.fc .hint { font-size: 11px; color: var(--muted); margin-top: 7px; }
+
+.tagrow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; }
+.tag {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted);
+  background: var(--card); border: 1px solid var(--rule); padding: 3px 8px; border-radius: 4px;
+}
+
+.askbox { background: var(--card); border: 1px solid var(--rule); border-radius: 9px; padding: 15px; margin-top: 26px; }
+.askbox .lbl { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 9px; }
+.askrow { display: flex; gap: 8px; }
+.ans {
+  font-size: 13.5px; line-height: 1.68; color: var(--graphite); margin-top: 12px;
+  padding-top: 12px; border-top: 1px solid var(--rule); white-space: pre-wrap;
+}
+
+.cfg-row { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+.cfg-row input[type=color] {
+  width: 34px; height: 34px; flex: 0 0 34px; padding: 0;
+  border: 1px solid var(--rule); border-radius: 6px; background: none; cursor: pointer;
+}
+
+/* ---------------- misc ---------------- */
+
+.spin {
+  width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff; border-radius: 50%; animation: sp .7s linear infinite; display: inline-block;
+}
+.spin.dark { border-color: rgba(20,24,59,.2); border-top-color: var(--ink); }
+@keyframes sp { to { transform: rotate(360deg) } }
+
+.err {
+  background: #FFF3F4; border: 1px solid #F3C9CE; color: var(--danger);
+  font-size: 13px; padding: 10px 13px; border-radius: 7px; margin-top: 12px; line-height: 1.5;
+}
+.danger { color: var(--danger); border-color: #F3C9CE; }
+
+.toast {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: #fff; font-size: 13px; padding: 11px 18px;
+  border-radius: 8px; z-index: 80; box-shadow: 0 8px 26px rgba(0,0,0,.3); animation: fade .18s;
+}
+.hidden { display: none !important; }
+
+/* ---------------- responsive ---------------- */
+
+@media (max-width: 860px) {
+  .app { flex-direction: column; }
+  .rail { width: 100%; flex: 0 0 auto; padding: 16px 0 0; }
+  .brand { padding: 0 16px 14px; }
+  .rail-label { display: none; }
+  .rail-tabs { display: flex; overflow-x: auto; gap: 4px; padding: 0 12px; scrollbar-width: none; }
+  .rail-tabs::-webkit-scrollbar { display: none; }
+  .tab { margin: 0; width: auto; flex: 0 0 auto; border-radius: 7px 7px 0 0; padding: 10px 14px; }
+  .tab.on { margin: 0; box-shadow: none; }
+  .tab.on::before { left: 10px; right: 10px; top: 0; bottom: auto; width: auto; height: 3px; }
+  .rail-foot { margin: 0; padding: 10px 16px 12px; display: flex; gap: 16px; order: -1; }
+  .rail-btn { padding: 0; width: auto; }
+  .canvas-in { padding: 22px 18px 70px; }
+  .head h1 { font-size: 26px; }
+  .intake { grid-template-columns: 1fr; }
+  .style-grid { grid-template-columns: 1fr; }
+  .sheet-body { padding: 20px 18px 50px; }
+  .sheet-bar { padding: 12px 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="rail">
+    <div class="brand">
+      <div class="brand-mark" id="brandMark">Study Register</div>
+      <div class="brand-sub" id="brandSub">One register. Five dividers.</div>
+    </div>
+    <div class="rail-label">Dividers</div>
+    <div class="rail-tabs" id="railTabs"></div>
+    <div class="rail-foot">
+      <button class="rail-btn" id="btnSearch">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+        Search all notes
+      </button>
+      <button class="rail-btn" id="btnSettings">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7.9 19.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 15a2 2 0 1 1 0-4 1.6 1.6 0 0 0 1.1-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 4.6V4a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.6 1.6 0 0 0 19.4 9H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+        Settings
+      </button>
+    </div>
+  </nav>
+
+  <main class="canvas">
+    <div class="canvas-in" id="canvas"></div>
+  </main>
+</div>
+
+<div id="overlay"></div>
+<div id="toastHost"></div>
+
+<script>
+/* ==================================================================
+   Configuration
+   ------------------------------------------------------------------
+   In production, point API_ENDPOINT at your own backend so the API
+   key never reaches the browser. The proxy should forward the body
+   to https://api.anthropic.com/v1/messages and add the auth headers.
+   ================================================================== */
+
+const API_ENDPOINT = "https://api.anthropic.com/v1/messages";
+const MODEL = "claude-sonnet-4-6";
+
+const KEY_NOTES = "studyreg:notes";
+const KEY_CONFIG = "studyreg:config";
+
+const DEFAULT_CONFIG = {
+  brand: "Study Register",
+  tagline: "One register. Five dividers.",
+  subjects: [
+    { id: "phy",  name: "Physics",          color: "#2F49D1" },
+    { id: "chem", name: "Chemistry",        color: "#0E7A5F" },
+    { id: "math", name: "Mathematics",      color: "#C6295C" },
+    { id: "bio",  name: "Biology",          color: "#6B3FB5" },
+    { id: "cs",   name: "Computer Science", color: "#C9700A" }
+  ]
+};
+
+const LEVELS = ["Class 9","Class 10","Class 11","Class 12","JEE","NEET","College"];
+const STYLES = [
+  { id:"revision", label:"Quick revision",  hint:"Short points you can read the night before" },
+  { id:"detailed", label:"Detailed notes",  hint:"Full explanation with worked reasoning" },
+  { id:"formula",  label:"Formula sheet",   hint:"Formulas, constants and when to use them" },
+  { id:"qa",       label:"Question bank",   hint:"Exam-style questions with answers" }
+];
+
+const SCHEMA = `Return ONLY a JSON object. No prose, no markdown fences.
+{
+  "title": "short note title",
+  "summary": "two sentences on what this covers",
+  "sections": [{ "heading": "string", "points": ["string"] }],
+  "formulas": ["string"],
+  "flashcards": [{ "q": "string", "a": "string" }],
+  "tags": ["string"]
+}
+Rules: 3-5 sections, 3-5 points each, points under 25 words. formulas may be []. Max 5 flashcards. Max 4 tags. Be dense and exam-focused, never padded.`;
+
+/* ---------------- storage adapter ----------------
+   Uses the sandbox store when present, otherwise localStorage,
+   otherwise an in-memory fallback so nothing throws.
+--------------------------------------------------- */
+
+const mem = {};
+const store = {
+  async get(k) {
+    if (window.storage) { try { const r = await window.storage.get(k); return r ? r.value : null; } catch { return null; } }
+    try { return localStorage.getItem(k); } catch { return mem[k] ?? null; }
+  },
+  async set(k, v) {
+    if (window.storage) { try { await window.storage.set(k, v); return; } catch {} }
+    try { localStorage.setItem(k, v); } catch { mem[k] = v; }
+  }
+};
+
+async function loadJSON(key, fallback) {
+  const raw = await store.get(key);
+  if (!raw) return fallback;
+  try { return JSON.parse(raw); } catch { return fallback; }
+}
+const saveJSON = (key, val) => store.set(key, JSON.stringify(val));
+
+/* ---------------- API ---------------- */
+
+async function askClaude(content) {
+  const res = await fetch(API_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model: MODEL, max_tokens: 1000, messages: [{ role: "user", content }] })
+  });
+  if (!res.ok) throw new Error("Request failed: " + res.status);
+  const data = await res.json();
+  return (data.content || []).filter(b => b.type === "text").map(b => b.text).join("\n");
+}
+
+function parseNote(raw) {
+  let t = (raw || "").trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+  const a = t.indexOf("{"), b = t.lastIndexOf("}");
+  if (a !== -1 && b !== -1) t = t.slice(a, b + 1);
+  const o = JSON.parse(t);
+  return {
+    title: String(o.title || "Untitled note"),
+    summary: String(o.summary || ""),
+    sections: Array.isArray(o.sections) ? o.sections.map(s => ({
+      heading: String(s.heading || ""),
+      points: Array.isArray(s.points) ? s.points.map(String) : []
+    })) : [],
+    formulas: Array.isArray(o.formulas) ? o.formulas.map(String) : [],
+    flashcards: Array.isArray(o.flashcards) ? o.flashcards.map(c => ({ q: String(c.q||""), a: String(c.a||"") })) : [],
+    tags: Array.isArray(o.tags) ? o.tags.slice(0,4).map(String) : []
+  };
+}
+
+const fileToBase64 = file => new Promise((res, rej) => {
+  const r = new FileReader();
+  r.onload = () => res(String(r.result).split(",")[1]);
+  r.onerror = () => rej(new Error("Read failed"));
+  r.readAsDataURL(file);
+});
+
+/* ---------------- helpers ---------------- */
+
+const uid = () => Math.random().toString(36).slice(2, 10);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const when = ts => new Date(ts).toLocaleDateString("en-IN", { day:"numeric", month:"short" });
+const $ = sel => document.querySelector(sel);
+
+function toMarkdown(note, subjectName) {
+  const L = ["# " + note.title, "", "_" + subjectName + (note.level ? " · " + note.level : "") + "_", "", note.summary, ""];
+  note.sections.forEach(s => { L.push("## " + s.heading); s.points.forEach(p => L.push("- " + p)); L.push(""); });
+  if (note.formulas.length) { L.push("## Formulas"); note.formulas.forEach(f => L.push("- " + f)); L.push(""); }
+  if (note.flashcards.length) { L.push("## Recall"); note.flashcards.forEach(c => L.push("**" + c.q + "**", "", c.a, "")); }
+  return L.join("\n");
+}
+
+const ICON = {
+  spark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M17.7 6.3l-2.8 2.8M9.1 14.9l-2.8 2.8"/></svg>',
+  doc:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>',
+  cam:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.4"/></svg>',
+  back:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>',
+  down:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 12l5 5 5-5M4 21h16"/></svg>',
+  bin:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>',
+  x:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>'
+};
+
+/* ---------------- state ---------------- */
+
+const S = {
+  config: DEFAULT_CONFIG,
+  notes: [],
+  view: "phy",       // subject id or "search"
+  mode: null,        // "ai" | "pdf" | "img"
+  query: "",
+  // composer state
+  topic: "", level: "Class 12", style: "revision",
+  files: [], focus: "", busy: false, error: ""
+};
+
+const subjectById = id => S.config.subjects.find(s => s.id === id);
+const colorOf = id => (subjectById(id) || {}).color || "#6B7192";
+const nameOf  = id => (subjectById(id) || {}).name  || "Unfiled";
+const current = () => subjectById(S.view) || S.config.subjects[0];
+
+function toast(msg) {
+  const host = $("#toastHost");
+  host.innerHTML = '<div class="toast">' + esc(msg) + '</div>';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => host.innerHTML = "", 2600);
+}
+
+/* ---------------- render ---------------- */
+
+function render() {
+  const accent = S.view === "search" ? "#2F49D1" : current().color;
+  document.documentElement.style.setProperty("--accent", accent);
+
+  $("#brandMark").textContent = S.config.brand;
+  $("#brandSub").textContent = S.config.tagline;
+
+  // rail
+  $("#railTabs").innerHTML = S.config.subjects.map(s => {
+    const n = S.notes.filter(x => x.subjectId === s.id).length;
+    return '<button class="tab' + (S.view === s.id ? " on" : "") + '" data-sub="' + s.id + '" style="--tabcolor:' + s.color + '">'
+      + '<span class="dot" style="background:' + s.color + '"></span>'
+      + '<span class="nm">' + esc(s.name) + '</span>'
+      + '<span class="ct mono">' + n + '</span></button>';
+  }).join("");
+  $("#btnSearch").classList.toggle("on", S.view === "search");
+
+  // canvas
+  const visible = S.view === "search"
+    ? (S.query.trim()
+        ? S.notes.filter(n => (n.title + " " + n.summary + " " + n.tags.join(" ")).toLowerCase().includes(S.query.trim().toLowerCase()))
+        : S.notes)
+    : S.notes.filter(n => n.subjectId === S.view);
+
+  let html = "";
+
+  if (S.view === "search") {
+    html += '<div class="head"><h1>Search</h1><div class="head-meta"><span>'
+      + S.notes.length + ' notes across ' + S.config.subjects.length + ' subjects</span></div></div>'
+      + '<input class="search-in" id="searchIn" placeholder="Search titles, summaries and tags" value="' + esc(S.query) + '">';
+  } else {
+    const sub = current();
+    const idx = S.config.subjects.findIndex(s => s.id === sub.id) + 1;
+    html += '<div class="head"><h1>' + esc(sub.name) + '</h1><div class="head-meta">'
+      + '<span class="mono">' + visible.length + (visible.length === 1 ? ' note' : ' notes') + '</span>'
+      + '<span class="pill"><span class="dot" style="width:6px;height:6px;border-radius:50%;background:' + sub.color + '"></span>'
+      + 'Divider ' + idx + ' of ' + S.config.subjects.length + '</span></div></div>';
+
+    html += '<div class="intake">'
+      + intakeCard("ai",  ICON.spark, "Write notes on a topic",   "Name a chapter or concept and get structured notes back.")
+      + intakeCard("pdf", ICON.doc,   "Turn a PDF into notes",     "Textbook chapters, question papers, coaching handouts.")
+      + intakeCard("img", ICON.cam,   "Photograph your register",  "Handwritten pages and blackboard shots become typed notes.")
+      + '</div>';
+
+    if (S.mode === "ai") html += topicPanel();
+    if (S.mode === "pdf" || S.mode === "img") html += uploadPanel(S.mode === "pdf");
+  }
+
+  if (visible.length) {
+    html += '<div class="sec-label">' + (S.view === "search" ? "Results" : "Saved notes") + '</div><div class="grid">'
+      + visible.map(n =>
+          '<button class="note" data-note="' + n.id + '" style="--nc:' + colorOf(n.subjectId) + '">'
+          + '<div class="t">' + esc(n.title) + '</div>'
+          + '<div class="s">' + esc(n.summary) + '</div>'
+          + '<div class="f"><span class="src">' + (n.source === "pdf" ? "PDF" : n.source === "img" ? "Photo" : "Topic") + '</span>'
+          + (S.view === "search" ? '<span>' + esc(nameOf(n.subjectId)) + '</span>' : '')
+          + '<span class="mono stamp">' + when(n.createdAt) + '</span></div></button>'
+        ).join("") + '</div>';
+  } else {
+    html += '<div class="empty"><div class="t">'
+      + (S.view === "search" ? "Nothing matched that" : "No notes in " + esc(current().name) + " yet")
+      + '</div><div class="d">'
+      + (S.view === "search" ? "Try a chapter name, a formula or a tag." : "Start with a topic, a PDF, or a photo of your register.")
+      + '</div></div>';
+  }
+
+  $("#canvas").innerHTML = html;
+  wireCanvas();
+}
+
+function intakeCard(mode, icon, title, desc) {
+  return '<button class="intake-card' + (S.mode === mode ? " on" : "") + '" data-mode="' + mode + '">'
+    + icon + '<div class="t">' + title + '</div><div class="d">' + desc + '</div></button>';
+}
+
+function topicPanel() {
+  return '<div class="panel">'
+    + '<div class="field"><label for="topic">What should the notes cover?</label>'
+    + '<textarea class="inp" id="topic" placeholder="e.g. Rotational motion — moment of inertia and torque">' + esc(S.topic) + '</textarea></div>'
+    + '<div class="field"><label>Level</label><div class="chips">'
+    + LEVELS.map(l => '<button class="chip' + (S.level === l ? " on" : "") + '" data-level="' + l + '">' + l + '</button>').join("")
+    + '</div></div>'
+    + '<div class="field"><label>Style</label><div class="style-grid">'
+    + STYLES.map(s => '<button class="style-opt' + (S.style === s.id ? " on" : "") + '" data-style="' + s.id + '">'
+        + '<div class="t">' + s.label + '</div><div class="h">' + s.hint + '</div></button>').join("")
+    + '</div></div>'
+    + '<button class="btn" id="runTopic"' + (S.busy || !S.topic.trim() ? " disabled" : "") + '>'
+    + (S.busy ? '<span class="spin"></span> Writing notes…' : 'Write notes') + '</button>'
+    + (S.error ? '<div class="err">' + esc(S.error) + '</div>' : '')
+    + '</div>';
+}
+
+function uploadPanel(isPdf) {
+  return '<div class="panel">'
+    + '<div class="drop" id="drop"><div class="big">' + (isPdf ? "Drop a PDF here" : "Drop your photos here") + '</div>'
+    + '<div class="small">' + (isPdf ? "One file at a time" : "Up to 4 pages · JPG, PNG or WebP") + '</div>'
+    + '<button class="btn-ghost" id="pick" style="margin-top:12px">Choose ' + (isPdf ? "file" : "files") + '</button>'
+    + '<input type="file" id="fileIn" class="hidden" accept="' + (isPdf ? "application/pdf" : "image/png,image/jpeg,image/webp") + '"' + (isPdf ? "" : " multiple") + '></div>'
+    + (S.files.length ? '<div class="filelist">' + S.files.map((f, i) =>
+        '<div class="filerow">' + (isPdf ? ICON.doc : ICON.cam)
+        + '<span class="nm">' + esc(f.name) + '</span>'
+        + '<span class="sz mono">' + Math.round(f.size / 1024) + ' KB</span>'
+        + '<button data-rm="' + i + '" aria-label="Remove ' + esc(f.name) + '" style="color:var(--muted)">' + ICON.x + '</button></div>').join("") + '</div>' : '')
+    + '<div class="field" style="margin-top:14px"><label for="focus">Anything to focus on? (optional)</label>'
+    + '<input class="inp" id="focus" placeholder="e.g. only the numericals, or skip the introduction" value="' + esc(S.focus) + '"></div>'
+    + '<button class="btn" id="runUpload"' + (S.busy || !S.files.length ? " disabled" : "") + '>'
+    + (S.busy ? '<span class="spin"></span> ' + (isPdf ? "Reading your PDF…" : "Reading your pages…") : "Make notes") + '</button>'
+    + (S.error ? '<div class="err">' + esc(S.error) + '</div>' : '')
+    + '</div>';
+}
+
+/* ---------------- events ---------------- */
+
+function wireCanvas() {
+  const c = $("#canvas");
+
+  c.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => {
+    S.mode = S.mode === b.dataset.mode ? null : b.dataset.mode;
+    S.files = []; S.error = ""; render();
+  });
+  c.querySelectorAll("[data-note]").forEach(b => b.onclick = () => openReader(b.dataset.note));
+  c.querySelectorAll("[data-level]").forEach(b => b.onclick = () => { S.level = b.dataset.level; render(); });
+  c.querySelectorAll("[data-style]").forEach(b => b.onclick = () => { S.style = b.dataset.style; render(); });
+  c.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => {
+    S.files = S.files.filter((_, i) => i !== +b.dataset.rm); render();
+  });
+
+  const search = $("#searchIn");
+  if (search) {
+    search.oninput = e => { S.query = e.target.value; render(); $("#searchIn").focus(); };
+    if (document.activeElement !== search) { search.focus(); search.setSelectionRange(999, 999); }
+  }
+
+  const topic = $("#topic");
+  if (topic) topic.oninput = e => {
+    S.topic = e.target.value;
+    $("#runTopic").disabled = S.busy || !S.topic.trim();
+  };
+
+  const focus = $("#focus");
+  if (focus) focus.oninput = e => { S.focus = e.target.value; };
+
+  const runTopic = $("#runTopic");
+  if (runTopic) runTopic.onclick = generateFromTopic;
+
+  const pick = $("#pick"), fileIn = $("#fileIn"), drop = $("#drop");
+  if (pick) pick.onclick = () => fileIn.click();
+  if (fileIn) fileIn.onchange = e => takeFiles(e.target.files);
+  if (drop) {
+    drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
+    drop.ondragleave = () => drop.classList.remove("over");
+    drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); takeFiles(e.dataTransfer.files); };
+  }
+  const runUpload = $("#runUpload");
+  if (runUpload) runUpload.onclick = generateFromFiles;
+}
+
+function takeFiles(list) {
+  const isPdf = S.mode === "pdf";
+  const arr = Array.from(list).filter(f => isPdf ? f.type === "application/pdf" : f.type.startsWith("image/"));
+  if (!arr.length) {
+    S.error = isPdf ? "That isn't a PDF. Pick a .pdf file." : "Those aren't images. Pick JPG, PNG or WebP files.";
+  } else {
+    S.error = "";
+    S.files = arr.slice(0, isPdf ? 1 : 4);
+  }
+  render();
+}
+
+/* ---------------- generation ---------------- */
+
+async function generateFromTopic() {
+  if (!S.topic.trim()) return;
+  S.busy = true; S.error = ""; render();
+  try {
+    const sub = current();
+    const st = STYLES.find(x => x.id === S.style);
+    const note = parseNote(await askClaude(
+      "You are writing " + sub.name + " study notes for an Indian student at " + S.level + " level.\n"
+      + "Topic: " + S.topic.trim() + "\n"
+      + "Note style: " + st.label + " — " + st.hint + "\n"
+      + "Follow the syllabus conventions and notation used in Indian classrooms.\n\n" + SCHEMA
+    ));
+    note.level = S.level;
+    saveNote(note, "ai");
+    S.topic = "";
+  } catch (e) {
+    S.error = "Couldn't write those notes. Check your connection and try again.";
+  } finally {
+    S.busy = false; render();
+  }
+}
+
+async function generateFromFiles() {
+  if (!S.files.length) return;
+  const isPdf = S.mode === "pdf";
+  S.busy = true; S.error = ""; render();
+  try {
+    const blocks = [];
+    for (const f of S.files) {
+      const data = await fileToBase64(f);
+      blocks.push(isPdf
+        ? { type: "document", source: { type: "base64", media_type: "application/pdf", data } }
+        : { type: "image",    source: { type: "base64", media_type: f.type,           data } });
+    }
+    blocks.push({ type: "text", text:
+      "Read this " + (isPdf ? "PDF" : "set of photographed pages") + " and turn it into "
+      + current().name + " study notes for an Indian student."
+      + (S.focus.trim() ? " Focus on: " + S.focus.trim() + "." : "")
+      + "\nUse only what the source actually contains. If handwriting is unclear, note it in the summary rather than guessing.\n\n"
+      + SCHEMA });
+    saveNote(parseNote(await askClaude(blocks)), isPdf ? "pdf" : "img");
+    S.files = []; S.focus = "";
+  } catch (e) {
+    S.error = isPdf
+      ? "Couldn't read that PDF. Try a smaller file, or upload the pages as images."
+      : "Couldn't read those photos. Retake them in better light with the page filling the frame.";
+  } finally {
+    S.busy = false; render();
+  }
+}
+
+function saveNote(note, source) {
+  const rec = Object.assign({}, note, { id: uid(), subjectId: current().id, source, createdAt: Date.now() });
+  S.notes = [rec].concat(S.notes);
+  saveJSON(KEY_NOTES, S.notes);
+  S.mode = null;
+  toast("Note saved to " + current().name);
+  render();
+  openReader(rec.id);
+}
+
+/* ---------------- reader ---------------- */
+
+function closeOverlay() { $("#overlay").innerHTML = ""; }
+
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeOverlay(); });
+
+function openReader(id) {
+  const note = S.notes.find(n => n.id === id);
+  if (!note) return;
+  const accent = colorOf(note.subjectId);
+  const subjectName = nameOf(note.subjectId);
+
+  $("#overlay").innerHTML =
+    '<div class="scrim" id="scrim"><div class="sheet" id="sheet" style="--accent:' + accent + '">'
+    + '<div class="sheet-bar">'
+    + '<button class="btn-ghost" id="rClose">' + ICON.back + ' Back</button><span class="spacer"></span>'
+    + '<button class="btn-ghost" id="rDown">' + ICON.down + ' Markdown</button>'
+    + '<button class="btn-ghost" id="rDel" aria-label="Delete note">' + ICON.bin + '</button>'
+    + '</div><div class="sheet-body">'
+    + '<div class="eyebrow">' + esc(subjectName) + (note.level ? " · " + esc(note.level) : "") + '</div>'
+    + '<h2>' + esc(note.title) + '</h2>'
+    + (note.summary ? '<p class="sheet-sum">' + esc(note.summary) + '</p>' : '')
+    + note.sections.map(s => '<div class="block"><h3>' + esc(s.heading) + '</h3><ul>'
+        + s.points.map(p => '<li>' + esc(p) + '</li>').join("") + '</ul></div>').join("")
+    + (note.formulas.length ? '<div class="block"><h3>Formulas</h3>'
+        + note.formulas.map(f => '<div class="fmla">' + esc(f) + '</div>').join("") + '</div>' : '')
+    + (note.flashcards.length ? '<div class="block"><h3>Test yourself</h3>'
+        + note.flashcards.map((c, i) =>
+            '<button class="fc" data-fc="' + i + '"><div class="q"><span class="n">'
+            + String(i + 1).padStart(2, "0") + '</span><span>' + esc(c.q) + '</span></div>'
+            + '<div class="hint">Tap to reveal</div>'
+            + '<div class="a hidden">' + esc(c.a) + '</div></button>').join("") + '</div>' : '')
+    + (note.tags.length ? '<div class="tagrow">' + note.tags.map(t => '<span class="tag">' + esc(t) + '</span>').join("") + '</div>' : '')
+    + '<div class="askbox"><div class="lbl">Ask about this note</div>'
+    + '<div class="askrow"><input class="inp" id="askIn" placeholder="Why does the sign flip here?">'
+    + '<button class="btn" id="askBtn">Ask</button></div><div id="askOut"></div></div>'
+    + '</div></div></div>';
+
+  $("#scrim").onclick = e => { if (e.target.id === "scrim") closeOverlay(); };
+  $("#rClose").onclick = closeOverlay;
+
+  $("#rDown").onclick = () => {
+    const blob = new Blob([toMarkdown(note, subjectName)], { type: "text/markdown" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = note.title.replace(/[^\w\s-]/g, "").slice(0, 50) + ".md";
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast("Downloaded");
+  };
+
+  let armed = false;
+  $("#rDel").onclick = () => {
+    if (!armed) {
+      armed = true;
+      $("#rDel").classList.add("danger");
+      $("#rDel").innerHTML = "Delete for good";
+      return;
+    }
+    S.notes = S.notes.filter(n => n.id !== id);
+    saveJSON(KEY_NOTES, S.notes);
+    closeOverlay(); toast("Note deleted"); render();
+  };
+
+  $("#sheet").querySelectorAll("[data-fc]").forEach(b => b.onclick = () => {
+    b.querySelector(".a").classList.toggle("hidden");
+    b.querySelector(".hint").classList.toggle("hidden");
+  });
+
+  const askBtn = $("#askBtn"), askIn = $("#askIn");
+  const doAsk = async () => {
+    const q = askIn.value.trim();
+    if (!q) return;
+    askBtn.disabled = true;
+    askBtn.innerHTML = '<span class="spin"></span>';
+    $("#askOut").innerHTML = "";
+    try {
+      const out = await askClaude(
+        "These are a student's study notes:\n\n" + toMarkdown(note, subjectName)
+        + "\n\nQuestion: " + q
+        + "\n\nAnswer in plain prose, under 150 words. Stay within what the notes cover; if the notes don't address it, say so and give the shortest correct answer."
+      );
+      $("#askOut").innerHTML = '<div class="ans">' + esc(out.trim()) + '</div>';
+    } catch {
+      $("#askOut").innerHTML = '<div class="ans">Couldn\'t answer that right now. Try again in a moment.</div>';
+    } finally {
+      askBtn.disabled = false;
+      askBtn.textContent = "Ask";
+    }
+  };
+  askBtn.onclick = doAsk;
+  askIn.onkeydown = e => { if (e.key === "Enter") doAsk(); };
+}
+
+/* ---------------- settings ---------------- */
+
+function openSettings() {
+  const d = JSON.parse(JSON.stringify(S.config));
+  $("#overlay").innerHTML =
+    '<div class="scrim" id="scrim"><div class="sheet narrow">'
+    + '<div class="sheet-bar"><strong style="font-family:\'Bricolage Grotesque\',sans-serif">Settings</strong>'
+    + '<span class="spacer"></span><button id="sClose" aria-label="Close settings">' + ICON.x + '</button></div>'
+    + '<div class="sheet-body">'
+    + '<div class="sec-label">Branding</div>'
+    + '<div class="field"><label for="cfgBrand">Product name</label><input class="inp" id="cfgBrand" value="' + esc(d.brand) + '"></div>'
+    + '<div class="field" style="margin-bottom:26px"><label for="cfgTag">Tagline</label><input class="inp" id="cfgTag" value="' + esc(d.tagline) + '"></div>'
+    + '<div class="sec-label">Subjects</div>'
+    + '<p style="font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.55">Rename dividers and set their pen colour. Existing notes stay where they are.</p>'
+    + d.subjects.map((s, i) =>
+        '<div class="cfg-row"><input type="color" data-col="' + i + '" value="' + s.color + '" aria-label="Colour for ' + esc(s.name) + '">'
+        + '<input class="inp" data-nm="' + i + '" value="' + esc(s.name) + '"></div>').join("")
+    + '<button class="btn btn-ink" id="sSave" style="margin-top:20px">Save settings</button>'
+    + '</div></div></div>';
+
+  $("#scrim").onclick = e => { if (e.target.id === "scrim") closeOverlay(); };
+  $("#sClose").onclick = closeOverlay;
+  $("#sSave").onclick = () => {
+    S.config.brand = $("#cfgBrand").value.trim() || "Study Register";
+    S.config.tagline = $("#cfgTag").value.trim();
+    document.querySelectorAll("[data-nm]").forEach(inp => {
+      S.config.subjects[+inp.dataset.nm].name = inp.value.trim() || "Untitled";
+    });
+    document.querySelectorAll("[data-col]").forEach(inp => {
+      S.config.subjects[+inp.dataset.col].color = inp.value;
+    });
+    saveJSON(KEY_CONFIG, S.config);
+    closeOverlay(); toast("Settings saved"); render();
+  };
+}
+
+/* ---------------- boot ---------------- */
+
+$("#btnSearch").onclick = () => { S.view = "search"; S.mode = null; render(); };
+$("#btnSettings").onclick = openSettings;
+$("#railTabs").addEventListener("click", e => {
+  const t = e.target.closest("[data-sub]");
+  if (!t) return;
+  S.view = t.dataset.sub; S.mode = null; S.error = ""; S.files = []; render();
+});
+
+(async function init() {
+  const [cfg, notes] = await Promise.all([
+    loadJSON(KEY_CONFIG, DEFAULT_CONFIG),
+    loadJSON(KEY_NOTES, [])
+  ]);
+  S.config = Object.assign({}, DEFAULT_CONFIG, cfg);
+  S.notes = Array.isArray(notes) ? notes : [];
+  S.view = S.config.subjects[0].id;
+  render();
+})();
+</script>
+</body>
+</html>
